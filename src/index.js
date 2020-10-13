@@ -30,26 +30,9 @@ async function run(octokit, context, token) {
 	const buildScript = getInput('build-script') || 'build';
 	const cwd = process.cwd();
 
-	const yarnLock = await fileExists(path.resolve(cwd, 'yarn.lock'));
-	const packageLock = await fileExists(path.resolve(cwd, 'package-lock.json'));
-
-	let npm = `npm`;
-	let installScript = `npm install`;
-	if (yarnLock) {
-		installScript = npm = `yarn --frozen-lockfile`;
-	}
-	else if (packageLock) {
-		installScript = `npm ci`;
-	}
-
-	startGroup(`[current] Install Dependencies`);
-	console.log(`Installing using ${installScript}`)
-	await exec(installScript);
-	endGroup();
-
-	startGroup(`[current] Build using ${npm}`);
-	console.log(`Building using ${npm} run ${buildScript}`);
-	await exec(`${npm} run ${buildScript}`);
+	startGroup(`[current] Build`);
+	console.log(`Building using yarn ${buildScript}`);
+	await exec(`yarn ${buildScript}`);
 	endGroup();
 	
 	// In case the build step alters a JSON-file, ....
@@ -89,12 +72,8 @@ async function run(octokit, context, token) {
 	}
 	endGroup();
 
-	startGroup(`[base] Install Dependencies`);
-	await exec(installScript);
-	endGroup();
-
-	startGroup(`[base] Build using ${npm}`);
-	await exec(`${npm} run ${buildScript}`);
+	startGroup(`[base] Build`);
+	await exec(`yarn ${buildScript}`);
 	endGroup();
 
         // In case the build step alters a JSON-file, ....
